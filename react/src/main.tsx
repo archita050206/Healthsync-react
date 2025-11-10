@@ -5,6 +5,7 @@ import Home from './components/pages/home'
 import Login from './components/login'
 import Signup from './components/signup'
 import DashboardLayout from './components/dashboard/DashboardLayout'
+import AuthGuard from './components/auth-guard'
 import EMRDashboard from './components/dashboard/emr-dashboard'
 import ICD11Sidebar from './components/dashboard/icd11'
 import SettingsPage from './components/dashboard/settings'
@@ -20,7 +21,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
-        <Route path="/dashboard" element={<DashboardLayout />}>
+  <Route path="/dashboard" element={<AuthGuard><DashboardLayout /></AuthGuard>}>
           <Route index element={<EMRDashboard />} />
           <Route path="icd11" element={<ICD11Sidebar />} />
           <Route path="patients" element={<ICD11Sidebar />} />

@@ -13,7 +13,9 @@ export function Header() {
           <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
             <img src="/logo-white.png" alt="HealthSync Logo" className="w-6 h-6" />
           </div>
+          <Link to="/">
           <span className="text-xl font-semibold text-foreground">HealthSync</span>
+          </Link>
         </div> 
 
         <nav className="hidden md:flex items-center gap-8">
