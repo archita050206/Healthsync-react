@@ -2,7 +2,7 @@
 
 import { Button } from "./ui/button"
 import { Users, MessageCircle, BookOpen, Shield, Search } from "lucide-react"
-import { motion, useScroll } from "framer-motion"
+import { motion } from "framer-motion"
 
 import { useRef, useState, useEffect } from "react"
 import { Card } from "./ui/card"

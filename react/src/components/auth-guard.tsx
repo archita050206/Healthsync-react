@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, PropsWithChildren } from 'react'
+import { useEffect, useState, type PropsWithChildren } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 export default function AuthGuard({ children }: PropsWithChildren) {

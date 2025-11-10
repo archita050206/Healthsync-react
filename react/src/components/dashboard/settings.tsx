@@ -28,6 +28,22 @@ function Settings() {
   const [affiliatedDoctors, setAffiliatedDoctors] = useState<any[]>([])
   const [loadingOrg, setLoadingOrg] = useState(false)
 
+  const loadOrganization = useCallback(async () => {
+    if (! (user?.profile as any)?.organizationId) return
+    setLoadingOrg(true)
+    try {
+      const res = await authFetch('/api/user/organization')
+      if (!res.ok) return
+      const data = await res.json()
+      setOrg(data.organization || null)
+      setAffiliatedDoctors(data.affiliatedDoctors || [])
+    } catch {
+      // ignore
+    } finally {
+      setLoadingOrg(false)
+    }
+  }, [authFetch, user?.profile?.organizationId])
+
   useEffect(() => {
     if (!loading && user) {
       setName('')
@@ -58,22 +74,6 @@ function Settings() {
       setTimeout(() => setSaved(null), 2500)
     }
   }
-
-  const loadOrganization = useCallback(async () => {
-    if (! (user?.profile as any)?.organizationId) return
-    setLoadingOrg(true)
-    try {
-      const res = await authFetch('/api/user/organization')
-      if (!res.ok) return
-      const data = await res.json()
-      setOrg(data.organization || null)
-      setAffiliatedDoctors(data.affiliatedDoctors || [])
-    } catch {
-      // ignore
-    } finally {
-      setLoadingOrg(false)
-    }
-  }, [authFetch, user?.profile?.organizationId])
 
   async function saveOrganization(updated: { name?: string }) {
     if (!org) return
