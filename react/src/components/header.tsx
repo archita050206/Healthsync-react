@@ -1,7 +1,6 @@
 "use client"
 
 import { Button } from "./ui/button"
-import { Heart } from "lucide-react"
 import ThemeToggle from './theme-toggle'
 import { Link } from 'react-router-dom'
 import { useAuth } from "../lib/auth"

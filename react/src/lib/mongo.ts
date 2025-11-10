@@ -1,5 +1,14 @@
 import { MongoClient } from 'mongodb'
 
+declare const process: {
+  env: {
+    MONGODB_URI?: string
+    MONGODB_URL?: string
+    MONGODB_DB?: string
+    [key: string]: string | undefined
+  }
+}
+
 const uri = process.env.MONGODB_URI || process.env.MONGODB_URL || ''
 const dbName = process.env.MONGODB_DB || 'healthsync'
 
@@ -9,18 +18,17 @@ type Cached = {
 }
 
 declare global {
-  // eslint-disable-next-line no-var
   var __HS_MONGO_CACHED: Cached | undefined
 }
 
 export async function getDb() {
   if (!uri) return null
-  if (global.__HS_MONGO_CACHED) return global.__HS_MONGO_CACHED.db
+  if (globalThis.__HS_MONGO_CACHED) return globalThis.__HS_MONGO_CACHED.db
 
   const client = new MongoClient(uri)
   await client.connect()
   const db = client.db(dbName)
-  global.__HS_MONGO_CACHED = { client, db }
+  globalThis.__HS_MONGO_CACHED = { client, db }
   return db
 }
 

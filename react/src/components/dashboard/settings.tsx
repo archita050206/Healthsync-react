@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import AuthGuard from '@/components/auth-guard'
 import { useAuth } from '@/lib/auth'
 import ThemeToggle from '@/components/theme-toggle'
@@ -22,13 +22,15 @@ function Settings() {
   const [email, setEmail] = useState('')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState<string | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [org, setOrg] = useState<any | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [affiliatedDoctors, setAffiliatedDoctors] = useState<any[]>([])
   const [loadingOrg, setLoadingOrg] = useState(false)
 
   useEffect(() => {
     if (!loading && user) {
-      setName(user.profile?.name || '')
+      setName('')
       setEmail(user.email || '')
       // load organization info when available
       loadOrganization()
@@ -36,7 +38,7 @@ function Settings() {
       setOrg(null)
       setAffiliatedDoctors([])
     }
-  }, [loading, user])
+  }, [loading, user, loadOrganization])
 
   async function saveProfile() {
     setSaving(true)
@@ -57,8 +59,8 @@ function Settings() {
     }
   }
 
-  async function loadOrganization() {
-    if (!user?.profile?.organizationId) return
+  const loadOrganization = useCallback(async () => {
+    if (! (user?.profile as any)?.organizationId) return
     setLoadingOrg(true)
     try {
       const res = await authFetch('/api/user/organization')
@@ -66,12 +68,12 @@ function Settings() {
       const data = await res.json()
       setOrg(data.organization || null)
       setAffiliatedDoctors(data.affiliatedDoctors || [])
-    } catch (e) {
+    } catch {
       // ignore
     } finally {
       setLoadingOrg(false)
     }
-  }
+  }, [authFetch, user?.profile?.organizationId])
 
   async function saveOrganization(updated: { name?: string }) {
     if (!org) return

@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Sun, Moon } from "lucide-react"
 import { Button } from "./ui/button"
 import { MoonIcon, SunIcon } from "./ui/icons"
 

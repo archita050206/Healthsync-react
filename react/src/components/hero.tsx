@@ -1,9 +1,8 @@
 "use client"
 
 import { Button } from "./ui/button"
-import { ArrowRight } from "lucide-react"
-import { Heart, Users, MessageCircle, BookOpen, Shield, Search } from "lucide-react"
-import { motion, useScroll, useTransform, useSpring } from "framer-motion"
+import { Users, MessageCircle, BookOpen, Shield, Search } from "lucide-react"
+import { motion, useScroll } from "framer-motion"
 
 import { useRef, useState, useEffect } from "react"
 import { Card } from "./ui/card"
@@ -33,7 +32,7 @@ const features = [
 
 export function Hero() {
   const containerRef = useRef(null)
-  const [isMobile, setIsMobile] = useState(false)
+  const [, setIsMobile] = useState(false)
 
   // State for ICD-11 API data and UI states
   const [query, setQuery] = useState("")
@@ -95,6 +94,7 @@ export function Hero() {
           description: '', // API does not provide description here
         }))
         setDiseaseCatalog(catalog)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         setError(err.message || 'Error fetching data')
         setDiseaseCatalog([])
@@ -162,11 +162,6 @@ export function Hero() {
     showToast('Log in to save patient records to EMR')
   }
 
-
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"]
-  })
 
   // Mobile animation ranges and spring configs as before (omitted here for brevity)
   // ... (copy your existing scroll and animation related code)

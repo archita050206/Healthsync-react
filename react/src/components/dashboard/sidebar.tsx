@@ -1,6 +1,6 @@
 "use client"
 import { Link, useLocation } from "react-router-dom"
-import { Menu, X, Home, BookOpen, Users, Stethoscope, Settings, Search, Bell, LogOut } from "lucide-react"
+import { Menu, X, Home, BookOpen, Users, Stethoscope, Settings, Search, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "../ui/input"
 import ThemeToggle from "../theme-toggle"
@@ -90,7 +90,7 @@ export default function Sidebar({ open, onToggle }: SidebarProps) {
           <Input placeholder="Search patients, codes..." className="pl-10 h-9 bg-input" />
         </div>
         <ThemeToggle />
-        <Link href="/" className="flex items-center gap-3 shrink-0">
+        <Link to="/" className="flex items-center gap-3 shrink-0">
           <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
             <img src="/logo-white.png" alt="HealthSync" className="w-5 h-5" />
           </div>
