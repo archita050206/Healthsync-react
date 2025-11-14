@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import { useState } from "react"
 import { Button } from "../ui/button"
 import { useAuth } from "@/lib/auth"
 
@@ -10,6 +10,7 @@ export default function ConfirmDeleteModal({ open, onClose, patient, onDeleted }
   if (!open || !patient) return null
 
   async function handleDelete() {
+    if (!patient) return
     setDeleting(true)
     try {
       const res = await authFetch(`/api/patients/${patient.id}`, { method: 'DELETE' })
