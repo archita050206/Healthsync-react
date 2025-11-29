@@ -372,12 +372,13 @@ export default function OrgDoctorsPanel({ orgId }: { orgId: string | null }) {
                   </div>
                 </div>
 
-                  <div className="mt-3 flex items-center justify-between gap-3">
+                  <div className="mt-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div className="text-xs text-muted-foreground">Last: {formatDateWithRelative(lastDiagnosis)}</div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
                       <Button
                         variant="ghost"
                         size="sm"
+                        className="w-full sm:w-auto"
                         onClick={() => {
                           // open details pane on large screens, inline expand on small screens
                           if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
@@ -396,48 +397,6 @@ export default function OrgDoctorsPanel({ orgId }: { orgId: string | null }) {
 
                 {expanded === d.id && (
                   <div className="mt-3 border-t border-border pt-3 space-y-3">
-                    <div>
-                      <h4 className="text-sm font-medium">Patients ({patientsCount})</h4>
-                      {d.patients && d.patients.length > 0 ? (
-                        <ul className="mt-2 list-disc list-inside text-sm max-h-40 overflow-auto">
-                          {d.patients.slice(0, 8).map((p: Patient) => (
-                            <li key={p.id}
-                              draggable
-                              onDragStart={(e) => {
-                                // create and attach a visual drag preview
-                                try {
-                                  const preview = createDragPreview(p.name || p.id, p.age ? `Age: ${p.age}` : '')
-                                  const el = (e.currentTarget as HTMLElement & { __dragPreview?: HTMLElement })
-                                  el.__dragPreview = preview
-                                  try { e.dataTransfer.setDragImage(preview, Math.floor(preview.offsetWidth / 2), Math.floor(preview.offsetHeight / 2)) } catch (err) { console.debug('setDragImage failed', err) }
-                                } catch (err) {
-                                  console.debug('createDragPreview failed', err)
-                                }
-                                e.dataTransfer.setData('text/plain', JSON.stringify({ patientId: p.id, fromDoctorId: d.id, patientName: p.name || '' }));
-                                e.dataTransfer.effectAllowed = 'move'
-                              }}
-                              onDragEnd={(e) => {
-                                try {
-                                  const el = (e.currentTarget as HTMLElement & { __dragPreview?: HTMLElement })
-                                  const prev = el.__dragPreview
-                                  if (prev && prev.parentNode) prev.parentNode.removeChild(prev)
-                                  el.__dragPreview = undefined
-                                } catch (err) { console.debug('clean drag preview failed', err) }
-                              }}
-                              className="cursor-grab"
-                            >
-                              <div className="flex items-center justify-between">
-                                <div className="min-w-0">
-                                  <div className="text-sm font-semibold truncate">{p.name || p.id}</div>
-                                  <div className="text-xs text-muted-foreground">Age: {p.age ?? '—'}</div>
-                                </div>
-                                <div className="text-xs text-muted-foreground">Drag</div>
-                              </div>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : <div className="text-sm text-muted-foreground">No patients</div>}
-                    </div>
 
                     <div>
                       <h4 className="text-sm font-medium">Recent Diagnoses ({diagnosesCount})</h4>

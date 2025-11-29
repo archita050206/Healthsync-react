@@ -9,6 +9,7 @@ import AuthGuard from './components/auth-guard'
 import EMRDashboard from './components/dashboard/emr-dashboard'
 import ICD11Sidebar from './components/dashboard/icd11'
 import SettingsPage from './components/dashboard/settings'
+import ReportsPage from './components/dashboard/ReportsPage'
 import AuthProvider from '@/lib/auth'
 import './index.css'
 
@@ -25,6 +26,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <Route index element={<EMRDashboard />} />
           <Route path="icd11" element={<ICD11Sidebar />} />
           <Route path="patients" element={<ICD11Sidebar />} />
+          <Route path="reports" element={<ReportsPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
 

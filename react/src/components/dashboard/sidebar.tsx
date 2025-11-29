@@ -38,6 +38,8 @@ const menuItems = [
 export default function Sidebar({ open, onToggle }: SidebarProps) {
   const location = useLocation()
   const pathname = location.pathname
+  const { user } = useAuth()
+  const isOrg = user?.role === 'organization'
 
   return (
     <>
@@ -52,8 +54,8 @@ export default function Sidebar({ open, onToggle }: SidebarProps) {
           <p className="text-xs text-sidebar-foreground/60 mt-1">Traditional Medicine Integrated</p>
         </div>
 
-  <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-          {menuItems.map((item) => {
+    <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+      {menuItems.map((item) => {
             const Icon = item.icon
             const isActive = pathname === item.href
 
@@ -73,6 +75,16 @@ export default function Sidebar({ open, onToggle }: SidebarProps) {
               </Link>
             )
           })}
+          {isOrg && (
+            <Link key="/dashboard/reports" to="/dashboard/reports">
+              <Button
+                variant={pathname === '/dashboard/reports' ? 'default' : 'ghost'}
+                className={`w-full justify-start gap-3 ${pathname === '/dashboard/reports' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'text-sidebar-foreground hover:bg-sidebar-accent/10'}`}>
+                <BookOpen className="w-5 h-5" />
+                <span>Reports</span>
+              </Button>
+            </Link>
+          )}
         </nav>
         <div className="p-4">
           
@@ -126,6 +138,16 @@ export default function Sidebar({ open, onToggle }: SidebarProps) {
                   </Link>
                 )
               })}
+              {isOrg && (
+                <Link key="/dashboard/reports" to="/dashboard/reports" onClick={onToggle}>
+                  <Button
+                    variant={pathname === '/dashboard/reports' ? 'default' : 'ghost'}
+                    className={`w-full justify-start gap-3 ${pathname === '/dashboard/reports' ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'text-sidebar-foreground hover:bg-sidebar-accent/10'}`}>
+                    <BookOpen className="w-5 h-5" />
+                    <span>Reports</span>
+                  </Button>
+                </Link>
+              )}
             </nav>
             <div className="p-4">
               <LogoutButton />

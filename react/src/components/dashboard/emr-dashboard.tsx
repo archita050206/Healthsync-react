@@ -257,7 +257,7 @@ export default function EMRDashboard() {
                 <button className="px-3 py-2 rounded-md border border-border bg-card" onClick={() => { setShowAllPatients(s => !s) }}>{showAllPatients ? 'Hide table' : 'Show table'}</button>
               </div>
             </div>
-            <div id="org-patients-table" className={`overflow-auto ${showAllPatients ? 'block' : 'md:block lg:hidden'}`}>
+            <div id="org-patients-table" className={`overflow-auto ${showAllPatients ? 'block' : 'hidden'}`}>
               <table className="w-full text-sm">
                 <thead>
                   <tr className="text-left text-xs text-muted-foreground">
@@ -320,7 +320,7 @@ export default function EMRDashboard() {
           </Card>
         </div>
 
-        <div className="hidden mt-4 space-y-3">
+        <div className={`mt-4 space-y-3 ${showAllPatients ? 'hidden' : 'block md:hidden'}`}>
           {orgPatients.map(p => (
             <div key={p.id} className="border border-border rounded-lg p-3 bg-card flex items-center justify-between">
               <div>
