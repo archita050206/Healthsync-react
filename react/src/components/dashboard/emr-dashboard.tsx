@@ -159,7 +159,6 @@ export default function EMRDashboard() {
                 <Button className="w-full px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors" onClick={() => setOpen(true)}>
                   New Patient Record
                 </Button>
-                <NewPatientModal open={open} onClose={() => setOpen(false)} />
                 <Button className="w-full px-4 py-2 rounded-lg bg-accent text-accent-foreground text-sm font-medium hover:bg-accent/90 transition-colors" onClick={() => setAddDiagOpen(true)}>
                   Add Diagnosis
                 </Button>
@@ -179,47 +178,50 @@ export default function EMRDashboard() {
   // Organization view: list doctors and their details
   type UserProfile = { organizationId?: string | null } | undefined
   const orgId = (user?.profile as UserProfile)?.organizationId ?? null
-  // load org doctors + unassigned patients to build a flat patients list and doctor lookup
+  async function loadOrgData() {
+    if (!orgId) return
+    try {
+      const res = await authFetch(`/api/organizations/${orgId}/doctors`)
+      if (!res.ok) throw new Error('failed')
+      const data = await res.json()
+      const docs = data.doctors || []
+      const patients: Array<{ id: string; name?: string; age?: number; createdAt?: string; createdBy?: string }> = []
+      const map: Record<string, { name?: string; email?: string }> = {}
+      const list: Array<{ id: string; name?: string; email?: string }> = []
+      for (const d of docs) {
+        map[d.id] = { name: d.profile?.name, email: d.email }
+        list.push({ id: d.id, name: d.profile?.name, email: d.email })
+        if (Array.isArray(d.patients)) {
+          for (const p of d.patients) {
+            const rec = p as Record<string, unknown>
+            patients.push({ id: String(rec.id || rec._id || ''), name: rec.name ? String(rec.name) : undefined, age: typeof rec.age === 'number' ? (rec.age as number) : (rec.age ? Number(rec.age as unknown) : undefined), createdAt: rec.createdAt ? String(rec.createdAt) : undefined, createdBy: d.id })
+          }
+        }
+      }
+      try {
+        const u = await authFetch(`/api/organizations/${orgId}/unassigned`)
+        if (u.ok) {
+          const ud = await u.json()
+          for (const p of ud.patients || []) {
+            const rec = p as Record<string, unknown>
+            patients.push({ id: String(rec.id || rec._id || ''), name: rec.name ? String(rec.name) : undefined, age: typeof rec.age === 'number' ? (rec.age as number) : (rec.age ? Number(rec.age as unknown) : undefined), createdAt: rec.createdAt ? String(rec.createdAt) : undefined, createdBy: rec.createdBy ? String(rec.createdBy) : undefined })
+          }
+        }
+      } catch (e) { console.warn('failed to load unassigned patients', e) }
+      setDoctorMap(map)
+      setDoctorList(list)
+      setOrgPatients(patients)
+    } catch (err) {
+      console.error('load org patients', err)
+    }
+  }
+
   useEffect(() => {
     if (!orgId) return
     let cancelled = false
     ;(async () => {
-      try {
-        const res = await authFetch(`/api/organizations/${orgId}/doctors`)
-        if (!res.ok) throw new Error('failed')
-        const data = await res.json()
-        const docs = data.doctors || []
-        const patients: Array<{ id: string; name?: string; age?: number; createdAt?: string; createdBy?: string }> = []
-        const map: Record<string, { name?: string; email?: string }> = {}
-        const list: Array<{ id: string; name?: string; email?: string }> = []
-        for (const d of docs) {
-          map[d.id] = { name: d.profile?.name, email: d.email }
-          list.push({ id: d.id, name: d.profile?.name, email: d.email })
-          if (Array.isArray(d.patients)) {
-            for (const p of d.patients) {
-              const rec = p as Record<string, unknown>
-              patients.push({ id: String(rec.id || rec._id || ''), name: rec.name ? String(rec.name) : undefined, age: typeof rec.age === 'number' ? (rec.age as number) : (rec.age ? Number(rec.age as unknown) : undefined), createdAt: rec.createdAt ? String(rec.createdAt) : undefined, createdBy: d.id })
-            }
-          }
-        }
-        try {
-          const u = await authFetch(`/api/organizations/${orgId}/unassigned`)
-          if (u.ok) {
-            const ud = await u.json()
-            for (const p of ud.patients || []) {
-              const rec = p as Record<string, unknown>
-              patients.push({ id: String(rec.id || rec._id || ''), name: rec.name ? String(rec.name) : undefined, age: typeof rec.age === 'number' ? (rec.age as number) : (rec.age ? Number(rec.age as unknown) : undefined), createdAt: rec.createdAt ? String(rec.createdAt) : undefined, createdBy: rec.createdBy ? String(rec.createdBy) : undefined })
-            }
-          }
-        } catch (e) { console.warn('failed to load unassigned patients', e) }
-        if (!cancelled) {
-          setDoctorMap(map)
-          setDoctorList(list)
-          setOrgPatients(patients)
-        }
-      } catch (err) {
-        console.error('load org patients', err)
-      }
+      if (cancelled) return
+      await loadOrgData()
     })()
     return () => { cancelled = true }
   }, [orgId, authFetch])
@@ -253,10 +255,12 @@ export default function EMRDashboard() {
               <div className="flex-1">
                 <input value={patientSearch} onChange={(e) => setPatientSearch(e.target.value)} placeholder="Search patients by name, id, or doctor" className="w-full px-3 py-2 rounded-md border border-border bg-input text-sm" />
               </div>
-              <div>
+              <div className="flex items-center gap-2">
+                <Button size="sm" onClick={() => { setOpen(true); setShowAllPatients(true) }}>New Patient</Button>
                 <button className="px-3 py-2 rounded-md border border-border bg-card" onClick={() => { setShowAllPatients(s => !s) }}>{showAllPatients ? 'Hide table' : 'Show table'}</button>
               </div>
             </div>
+            <NewPatientModal open={open} onClose={() => setOpen(false)} orgId={orgId} onCreated={async () => { await loadOrgData(); setShowAllPatients(true) }} />
             <div id="org-patients-table" className={`overflow-auto ${showAllPatients ? 'block' : 'hidden'}`}>
               <table className="w-full text-sm">
                 <thead>
@@ -318,21 +322,6 @@ export default function EMRDashboard() {
               </table>
             </div>
           </Card>
-        </div>
-
-        <div className={`mt-4 space-y-3 ${showAllPatients ? 'hidden' : 'block md:hidden'}`}>
-          {orgPatients.map(p => (
-            <div key={p.id} className="border border-border rounded-lg p-3 bg-card flex items-center justify-between">
-              <div>
-                <div className="text-sm font-semibold">{p.name || p.id}</div>
-                <div className="text-xs text-muted-foreground">{p.age ?? '—'} · {p.createdAt ? new Date(p.createdAt).toLocaleDateString() : '—'}</div>
-                <div className="text-xs text-muted-foreground">{p.createdBy ? (doctorMap[p.createdBy]?.name || doctorMap[p.createdBy]?.email || p.createdBy) : 'Unassigned'}</div>
-              </div>
-              <div>
-                <button className="px-3 py-2 rounded-md bg-primary text-primary-foreground text-sm" onClick={() => { setAssignPatient({ id: p.id, name: p.name }); setAssignDoctorId(p.createdBy); setAssignOpen(true) }}>Assign</button>
-              </div>
-            </div>
-          ))}
         </div>
 
         <div className="grid grid-cols-1 gap-6">

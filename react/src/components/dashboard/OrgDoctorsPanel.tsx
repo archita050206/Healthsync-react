@@ -39,10 +39,6 @@ export default function OrgDoctorsPanel({ orgId }: { orgId: string | null }) {
   const [doctors, setDoctors] = useState<Doctor[]>([])
   const [loading, setLoading] = useState(false)
   const [expanded, setExpanded] = useState<string | null>(null)
-  const [newPatientOpen, setNewPatientOpen] = useState(false)
-  const [newName, setNewName] = useState("")
-  const [newAge, setNewAge] = useState<number | ''>("")
-  const [creating, setCreating] = useState(false)
   const [dropTarget, setDropTarget] = useState<string | null>(null)
   const [panelError, setPanelError] = useState<string | null>(null)
 
@@ -161,7 +157,7 @@ export default function OrgDoctorsPanel({ orgId }: { orgId: string | null }) {
           <p className="text-sm text-muted-foreground">View doctors and quick stats for your organization</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button size="sm" onClick={() => { setNewName(''); setNewAge(''); setNewPatientOpen(true) }}>New Patient</Button>
+          {/* New Patient button moved to Organization Patients table in EMR dashboard */}
         </div>
         <div className="w-full sm:w-80">
           <input
@@ -176,49 +172,7 @@ export default function OrgDoctorsPanel({ orgId }: { orgId: string | null }) {
       {panelError && <div className="text-sm text-destructive mt-2">{panelError}</div>}
 
 
-      {/* Inline New Patient modal for org admins (name + age only) */}
-      {newPatientOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setNewPatientOpen(false)} />
-          <div className="relative w-full max-w-md mx-4 bg-card border-border rounded-lg shadow-lg p-6">
-            <h3 className="text-lg font-semibold mb-4">New Patient</h3>
-            <form onSubmit={async (e) => {
-              e.preventDefault()
-              setCreating(true)
-              try {
-                if (!newName || String(newName).trim().length === 0) throw new Error('Name required')
-                if (!newAge || Number.isNaN(Number(newAge))) throw new Error('Valid age required')
-                const payload = { name: String(newName).trim(), age: Number(newAge) }
-                const res = await authFetch(`/api/organizations/${orgId}/patients`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-                if (!res.ok) {
-                  const txt = await res.text().catch(() => '')
-                  throw new Error(txt || 'failed')
-                }
-                // refresh lists
-                await refreshDoctors()
-                setNewPatientOpen(false)
-              } catch (err) {
-                console.error('create org patient failed', err)
-                // show lightweight alert for now
-                alert(err instanceof Error ? err.message : String(err))
-              } finally { setCreating(false) }
-            }} className="space-y-3">
-              <div>
-                <label className="block text-sm text-muted-foreground mb-1">Name</label>
-                <input value={newName} onChange={(e) => setNewName(e.target.value)} className="w-full px-3 py-2 rounded-md border border-border bg-input" />
-              </div>
-              <div>
-                <label className="block text-sm text-muted-foreground mb-1">Age</label>
-                <input value={String(newAge)} onChange={(e) => setNewAge(e.target.value ? Number(e.target.value) : '')} type="number" className="w-full px-3 py-2 rounded-md border border-border bg-input" />
-              </div>
-              <div className="flex items-center justify-end gap-2">
-                <button type="button" className="px-3 py-2 border border-border rounded-md" onClick={() => setNewPatientOpen(false)}>Cancel</button>
-                <button className="px-3 py-2 rounded-md bg-primary text-primary-foreground" type="submit" disabled={creating}>{creating ? 'Creating…' : 'Create'}</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      
 
       {loading && <div className="text-sm text-muted-foreground">Loading doctors…</div>}
       {!loading && doctors.length === 0 && <div className="text-sm text-muted-foreground">No doctors found.</div>}

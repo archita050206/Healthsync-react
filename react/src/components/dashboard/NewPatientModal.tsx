@@ -9,9 +9,10 @@ type Props = {
   open: boolean
   onClose: () => void
   onCreated?: (patientId: string) => void
+  orgId?: string | null
 }
 
-export default function NewPatientModal({ open, onClose, onCreated }: Props) {
+export default function NewPatientModal({ open, onClose, onCreated, orgId }: Props) {
   const { authFetch } = useAuth()
   const [name, setName] = useState("")
   const [age, setAge] = useState<number | "">("")
@@ -124,7 +125,8 @@ export default function NewPatientModal({ open, onClose, onCreated }: Props) {
   }, [query])
 
 
-  const canSubmit = useMemo(() => !!name && !!age && !!selectedCode, [name, age, selectedCode])
+  // Disease / ICD selection is optional for quick patient creation
+  const canSubmit = useMemo(() => !!name && !!age, [name, age])
 
   async function handleSubmit(e?: React.FormEvent) {
     e?.preventDefault()
@@ -132,9 +134,10 @@ export default function NewPatientModal({ open, onClose, onCreated }: Props) {
     setSaving(true)
   const payload = { name, age: Number(age), icd11: selectedCode, disease: selectedName || query }
     try {
-      // try to POST to backend if available via authFetch
+      // POST to backend; if orgId provided, create under that organization
       if (authFetch) {
-        const res = await authFetch('/api/patients', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+        const endpoint = orgId ? `/api/organizations/${orgId}/patients` : '/api/patients'
+        const res = await authFetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
         if (!res.ok) throw new Error('failed')
         const data = await res.json().catch(() => null)
         const newId = data?.id || data?._id || null
@@ -171,8 +174,8 @@ export default function NewPatientModal({ open, onClose, onCreated }: Props) {
           </div>
 
           <div>
-            <label className="block text-sm text-muted-foreground mb-1">Disease (search)</label>
-            <Input value={query} onChange={e => { setQuery(e.target.value); setSelectedCode(null); setSelectedName(null) }} placeholder="Search disease name e.g. malaria" />
+            <label className="block text-sm text-muted-foreground mb-1">Disease (optional — search)</label>
+            <Input value={query} onChange={e => { setQuery(e.target.value); setSelectedCode(null); setSelectedName(null) }} placeholder="Search disease name (optional) e.g. malaria" />
             {loadingSuggestions && <div className="mt-2 text-sm text-muted-foreground">Searching…</div>}
             {suggestError && <div className="mt-2 text-sm text-destructive">{suggestError}</div>}
             {suggestions.length > 0 && (
