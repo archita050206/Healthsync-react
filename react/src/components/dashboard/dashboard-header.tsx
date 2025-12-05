@@ -223,7 +223,7 @@ export default function Header({ onSidebarToggle }: HeaderProps) {
                   <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold">
                     <span>
                       {getUserInitials(
-                        (user?.profile as any)?.name ||, 
+                        (user?.profile as any)?.name, 
                         user?.email, 
                         user?.role, 
                         (user?.profile as any)?.admin
