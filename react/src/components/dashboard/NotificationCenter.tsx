@@ -8,6 +8,8 @@ type NotificationData = {
   patientName?: string
   patientAge?: number
   patientId?: string
+  assignedBy?: string
+  organizationName?: string
 }
 
 export type Notification = {
